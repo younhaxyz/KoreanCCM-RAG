@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결단 찬양 추천</title>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Pretendard:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #fafaf8;
+            --surface: #ffffff;
+            --surface-hover: #f5f4f0;
+            --border: #e8e5de;
+            --border-focus: #b8a88a;
+            --accent: #7c6344;
+            --accent-light: #c9a96e;
+            --accent-bg: #f7f0e6;
+            --text: #1a1714;
+            --text-secondary: #5c5650;
+            --text-muted: #9c9690;
+            --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+            --shadow-card: 0 2px 8px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.04);
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 64px 20px 100px;
+        }
+
+        /* 배경 패턴 */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                radial-gradient(circle at 20% 20%, rgba(201,169,110,0.06) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(124,99,68,0.04) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 580px;
+            position: relative;
+        }
+
+        /* 헤더 */
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeDown 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        .header .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--accent);
+            font-weight: 500;
+            margin-bottom: 18px;
+        }
+
+        .header .eyebrow::before,
+        .header .eyebrow::after {
+            content: '';
+            display: block;
+            width: 24px;
+            height: 1px;
+            background: var(--accent-light);
+        }
+
+        .header h1 {
+            font-family: 'Crimson Pro', 'Noto Serif KR', Georgia, serif;
+            font-size: clamp(2.0rem, 7vw, 3.2rem);
+            font-weight: 400;
+            color: var(--text);
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: 14px;
+        }
+
+        .header h1 em {
+            font-style: italic;
+            color: var(--accent);
+        }
+
+        .header p {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 300;
+            line-height: 1.8;
+        }
+
+        /* 검색 카드 */
+        .search-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 36px;
+            box-shadow: var(--shadow-card);
+            animation: fadeUp 0.7s 0.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+            transition: box-shadow 0.3s;
+        }
+
+        .search-card:focus-within {
+            box-shadow: 0 4px 16px rgba(124,99,68,0.1), 0 0 0 3px rgba(201,169,110,0.15);
+        }
+
+        .search-label {
+            display: block;
+            font-size: 11px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 14px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 40px 16px 80px; }
+
+            .search-card { padding: 22px 18px; }
+
+            .input-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .search-btn {
+                width: 100%;
+                padding: 14px;
+                font-size: 14px;
+                justify-content: center;
+            }
+
+            .song-main { padding: 16px 16px; gap: 12px; }
+
+            .lyrics-inner { padding: 18px 16px 18px 52px; }
+        }
+
+        input[type="text"] {
+            flex: 1;
+            background: var(--bg);
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            padding: 13px 18px;
+            font-size: 14px;
+            color: var(--text);
+            font-family: 'Pretendard', sans-serif;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+            -webkit-appearance: none;
+        }
+
+        input[type="text"]::placeholder { color: var(--text-muted); }
+
+        input[type="text"]:focus {
+            border-color: var(--border-focus);
+            background: #fff;
+        }
+
+        .search-btn {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 13px 24px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'Pretendard', sans-serif;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+            white-space: nowrap;
+            letter-spacing: 0.02em;
+        }
+
+        .search-btn:hover {
+            background: #6a5239;
+            box-shadow: 0 4px 12px rgba(124,99,68,0.25);
+        }
+
+        .search-btn:active { transform: scale(0.97); }
+
+        .search-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* 로딩 */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 52px 0;
+        }
+
+        .loading-dots {
+            display: inline-flex;
+            gap: 6px;
+        }
+
+        .loading-dots span {
+            display: block;
+            width: 6px;
+            height: 6px;
+            background: var(--accent-light);
+            border-radius: 50%;
+            animation: bounce 1.2s infinite ease-in-out;
+        }
+
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        .loading p {
+            font-size: 12px;
+            letter-spacing: 0.12em;
+            color: var(--text-muted);
+            margin-top: 14px;
+            text-transform: uppercase;
+        }
+
+        /* 결과 */
+        .results-wrap { animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+        .results-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            padding: 0 4px;
+        }
+
+        .results-meta span {
+            font-size: 11px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .results-count {
+            background: var(--accent-bg);
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+            letter-spacing: 0.05em;
+        }
+
+        /* 곡 카드 */
+        .song-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            margin-bottom: 10px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            animation: fadeUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+            transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+        }
+
+        .song-card:hover {
+            border-color: var(--border-focus);
+            box-shadow: var(--shadow-card);
+            transform: translateY(-1px);
+        }
+
+        .song-card:nth-child(1) { animation-delay: 0.05s; }
+        .song-card:nth-child(2) { animation-delay: 0.1s; }
+        .song-card:nth-child(3) { animation-delay: 0.15s; }
+        .song-card:nth-child(4) { animation-delay: 0.2s; }
+        .song-card:nth-child(5) { animation-delay: 0.25s; }
+
+        .song-main {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            padding: 18px 22px;
+        }
+
+        .rank-badge {
+            font-family: 'Crimson Pro', Georgia, serif;
+            font-size: 24px;
+            font-weight: 400;
+            font-style: italic;
+            color: var(--accent-light);
+            min-width: 28px;
+            line-height: 1;
+            user-select: none;
+        }
+
+        .song-info { flex: 1; min-width: 0; }
+
+        .song-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .song-artist {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 300;
+        }
+
+        /* 가사 토글 버튼 */
+        .lyrics-btn {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--accent-bg);
+            color: var(--accent);
+            border: 1px solid rgba(124,99,68,0.15);
+            border-radius: 8px;
+            padding: 7px 12px;
+            font-size: 11.5px;
+            font-weight: 500;
+            font-family: 'Pretendard', sans-serif;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+            white-space: nowrap;
+        }
+
+        .lyrics-btn:hover {
+            background: #eedfc4;
+            border-color: rgba(124,99,68,0.3);
+        }
+
+        .lyrics-btn.open {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .lyrics-btn .chevron {
+            font-size: 10px;
+            transition: transform 0.3s;
+            display: inline-block;
+            line-height: 1;
+        }
+
+        .lyrics-btn.open .chevron { transform: rotate(180deg); }
+
+        /* 가사 패널 */
+        .lyrics-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+            border-top: 0px solid var(--border);
+        }
+
+        .lyrics-panel.open {
+            max-height: 320px;
+            border-top-width: 1px;
+            overflow-y: auto;
+        }
+
+        .lyrics-panel.open::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .lyrics-panel.open::-webkit-scrollbar-track {
+            background: var(--surface-hover);
+        }
+
+        .lyrics-panel.open::-webkit-scrollbar-thumb {
+            background: var(--border-focus);
+            border-radius: 4px;
+        }
+
+        .lyrics-inner {
+            padding: 20px 22px 20px 68px;
+            background: var(--surface-hover);
+        }
+
+        .lyrics-text {
+            font-size: 13.5px;
+            color: var(--text-secondary);
+            line-height: 2;
+            font-weight: 300;
+            white-space: pre-wrap;
+            word-break: keep-all;
+        }
+
+        .lyrics-empty {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-style: italic;
+            font-family: 'Crimson Pro', serif;
+        }
+
+        /* 빈 결과 */
+        .empty-msg {
+            background: var(--surface);
+            border: 1px dashed var(--border);
+            border-radius: 16px;
+            padding: 48px 32px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 2;
+            box-shadow: var(--shadow);
+        }
+
+        .empty-msg strong {
+            display: block;
+            font-size: 22px;
+            font-family: 'Crimson Pro', serif;
+            font-weight: 400;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        /* 애니메이션 */
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
+            40%            { transform: scale(1);   opacity: 1; }
+        }
+
+        /* 구분선 장식 */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 40px 0 28px;
+            opacity: 0.5;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+        .divider span {
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <header class="header">
+        <div class="eyebrow">AI · 결단 찬양 추천</div>
+        <h1>말씀에 어울리는<br><em>결단 찬양  </em>을 찾아드려요</h1>
+        <p>설교 요약이나 말씀 주제를 입력하면<br>의미 있는 결단 찬양을 추천해드려요</p>
+    </header>
+
+    <div class="search-card">
+        <label class="search-label" for="query">말씀 주제 / 요약</label>
+        <div class="input-row">
+            <input type="text" id="query" placeholder="예: 이웃을 사랑하자, 하나님의 전능하심..." />
+            <button class="search-btn" onclick="doSearch()" id="btn">검색</button>
+        </div>
+    </div>
+
+    <div class="loading" id="loading">
+        <div class="loading-dots">
+            <span></span><span></span><span></span>
+        </div>
+        <p>찬양을 찾고 있어요</p>
+    </div>
+
+    <div id="results-container"></div>
+
+</div>
+
+<footer style="margin-top: 48px; font-size: 11px; color: var(--text-muted); letter-spacing: 0.1em;">
+    © 2026 Made by Younha Kim
+</footer>
+
+<script>
+    const input = document.getElementById("query");
+    input.addEventListener("keydown", e => { if (e.key === "Enter") doSearch(); });
+
+    function toggleLyrics(btn, panel) {
+        const isOpen = panel.classList.contains("open");
+        if (isOpen) {
+            panel.classList.remove("open");
+            btn.classList.remove("open");
+            btn.querySelector(".label-text").textContent = "가사 보기";
+        } else {
+            panel.classList.add("open");
+            btn.classList.add("open");
+            btn.querySelector(".label-text").textContent = "가사 닫기";
+        }
+    }
+
+    function doSearch() {
+        const query = input.value.trim();
+        if (!query) return;
+
+        const btn = document.getElementById("btn");
+        const loading = document.getElementById("loading");
+        const container = document.getElementById("results-container");
+
+        btn.disabled = true;
+        loading.style.display = "block";
+        container.innerHTML = "";
+
+        fetch(`/search?query=${encodeURIComponent(query)}`)
+            .then(res => res.json())
+            .then(data => {
+                loading.style.display = "none";
+                btn.disabled = false;
+
+                const wrap = document.createElement("div");
+                wrap.className = "results-wrap";
+
+                if (!data.results || data.results.length === 0) {
+                    wrap.innerHTML = `
+                        <div class="empty-msg">
+                            <strong>결과가 없어요 🙏</strong>
+                            다른 주제나 키워드로 다시 시도해보세요<br>
+                            또는 조금 더 길게 입력해보세요!
+                        </div>`;
+                } else {
+                    const meta = document.createElement("div");
+                    meta.className = "results-meta";
+                    meta.innerHTML = `
+                        <span>추천 찬양</span>
+                        <span class="results-count">${data.results.length}곡</span>`;
+                    wrap.appendChild(meta);
+
+                    data.results.forEach((item, idx) => {
+                        const card = document.createElement("div");
+                        card.className = "song-card";
+
+                        const hasLyrics = item.lyrics && item.lyrics.trim().length > 0;
+                        const lyricsContent = hasLyrics
+                            ? `<div class="lyrics-text">${escapeHtml(item.lyrics.trim())}</div>`
+                            : `<p class="lyrics-empty">가사 정보가 없어요</p>`;
+
+                        card.innerHTML = `
+                            <div class="song-main">
+                                <span class="rank-badge">${idx + 1}</span>
+                                <div class="song-info">
+                                    <div class="song-title">${escapeHtml(item.title)}</div>
+                                    <div class="song-artist">${escapeHtml(item.artist)}</div>
+                                </div>
+                                <button class="lyrics-btn" onclick="toggleLyrics(this, this.closest('.song-card').querySelector('.lyrics-panel'))">
+                                    <span class="label-text">가사 보기</span>
+                                    <span class="chevron">▾</span>
+                                </button>
+                            </div>
+                            <div class="lyrics-panel">
+                                <div class="lyrics-inner">${lyricsContent}</div>
+                            </div>
+                        `;
+                        wrap.appendChild(card);
+                    });
+                }
+                container.appendChild(wrap);
+            })
+            .catch(() => {
+                loading.style.display = "none";
+                btn.disabled = false;
+                container.innerHTML = `
+                    <div class="results-wrap">
+                        <div class="empty-msg">
+                            <strong>연결 오류 😢</strong>
+                            서버가 실행 중인지 확인해주세요
+                        </div>
+                    </div>`;
+            });
+    }
+
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+    }
+</script>
+</body>
+</html>
