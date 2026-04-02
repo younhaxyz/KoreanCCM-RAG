@@ -60,9 +60,13 @@ def search(query):
     if scores[0][0] < 0.4:
         return []
 
-    # top-5(인덱스 4)가 0.4 이상이면 전체 출력, 아니면 0.4 이상인 것만
-    top5_score = scores[0][min(TOP_K - 1, len(scores[0]) - 1)]
-    strict_threshold = top5_score >= 0.4  # True면 TOP_K까지, False면 0.4 커트
+    # top-5(인덱스 4)의 스코어 확인
+    top5_idx = min(TOP_K - 1, len(scores[0]) - 1)
+    top5_score = scores[0][top5_idx]
+
+    # top-5가 0.4 이상이면 → 0.4 이상인 것 모두 출력 (no cap)
+    # top-5가 0.4 미만이면 → top-5까지만 출력
+    no_cap = top5_score >= 0.4
 
     seen_titles = set()
     seen_first_lines = set()
@@ -71,9 +75,14 @@ def search(query):
     for rank, idx in enumerate(indices[0]):
         score = scores[0][rank]
 
-        # strict_threshold가 False일 때 (top-5 < 0.4): 0.4 미만이면 중단
-        if not strict_threshold and score < 0.4:
-            break
+        if no_cap:
+            # 0.4 미만이면 중단 (이상인 것만 모두 수집)
+            if score < 0.4:
+                break
+        else:
+            # top-5까지만 수집
+            if len(results) >= TOP_K:
+                break
 
         item = metadata[idx]
 
@@ -108,9 +117,6 @@ def search(query):
             "lyrics": lyrics if isinstance(lyrics, str) else "",
             "score": float(score)
         })
-
-        if len(results) >= TOP_K:
-            break
 
     return results
 
