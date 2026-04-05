@@ -1,6 +1,7 @@
 # KoreanCCM-RAG
 
 > RAG-based Korean CCM retrieval system for searching worship songs by sermon topic or scripture theme
+> 🔗KoCCM web link: [`KoCCM`](https://www.koccm.co.kr)
 
 ---
 
